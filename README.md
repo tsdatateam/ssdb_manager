@@ -17,7 +17,7 @@ pip install ssdb_manager
 ```sh
 import_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False)
 ```
-Imports and returns a full table from the database.
+Imports and returns a full table from the database.  
 **Arguments:**
   - **key**: Tuple in format (server, database).
   - **table_name**: Name of table to be imported from database. 
@@ -30,7 +30,7 @@ Imports and returns a full table from the database.
 ```sh
 create_table(key:tuple, table_name:str, df, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False, **kwargs)
 ```
-Creates a table using the passed pandas DataFrame in the database.
+Creates a table using the passed pandas DataFrame in the database.  
 **Arguments:**
   - **key**: Tuple in format (server, database).
   - **table_name**: Name of table to be created in the database. 
@@ -46,7 +46,7 @@ Creates a table using the passed pandas DataFrame in the database.
 ``` sh
 populate_table(key:tuple, table_name:str, df, if_exists:str = 'append', schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False)
 ```
-Adds rows to table in the database.
+Adds rows to table in the database.  
 **Arguments:**
   - **key**: Tuple in format (server, database).
   - **table_name**: Name of table to be populated in database. 
@@ -61,7 +61,7 @@ Adds rows to table in the database.
 ```sh
 drop_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False)
 ```
-Drops table from database. 
+Drops table from database.  
 **Arguments:**
   -  **key**: Tuple in format ('server', 'database').
   -  **table_name**: Name of table to be dropped from database. 
@@ -74,7 +74,7 @@ Drops table from database.
 ```sh
 trunc_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False)
 ```
-Truncates table in database.
+Truncates table in database.  
 **Arguments:**
   - **key**: Tuple in format (server, database).
   - **table_name**: Name of table to be truncated from database. 
@@ -87,7 +87,7 @@ Truncates table in database.
 ```sh
 delete_rows(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False, **kwargs)
 ```
-Removes specified rows from table in database. 
+Removes specified rows from table in database.  
 **Arguments:**
   - **key**: Tuple in format (server, database).
   - **table_name**: Name of table to be deleted from database. 
@@ -107,7 +107,7 @@ Removes specified rows from table in database.
 ``` sh
 custom_query(key:tuple, query:str,custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server')
 ```
-Runs custom query and returns resulting table.
+Runs custom query and returns resulting table.  
 **Arguments:**
   -  **key**: Tuple in format (server, database).
   -  **query**: String with custom SQL query.
