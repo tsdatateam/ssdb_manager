@@ -1,8 +1,8 @@
 # ssdb_manager
 
-Package built by the Tishman Speyer Data Analytics Team to expedite interactions with SQL Server. Import tables to pandas dataframes, or update/delete tables in your database with one line of Python. Partucularly useful when traversing between multiple databases. 
+Package built by the Tishman Speyer Data Analytics Team to expedite interactions with SQL Server. Import tables to pandas DataFrames, or update/delete tables in your database with one line of Python. Particularly useful when traversing between multiple databases. 
 
-This package builds upon functionality availibe in pandas, pyodbc, and sqlalchemy. 
+This package builds upon functionality available in pandas, pyodbc, and sqlalchemy. 
 
 ## Installation
 Using pip:
@@ -30,7 +30,7 @@ Imports and returns a full table from the database.
 ```sh
 create_table(key:tuple, table_name:str, df, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False, **kwargs)
 ```
-Creates a table using the passed pandas dataframe in the database.
+Creates a table using the passed pandas DataFrame in the database.
 **Arguments:**
   - **key**: Tuple in format (server, database).
   - **table_name**: Name of table to be created in the database. 
@@ -40,7 +40,7 @@ Creates a table using the passed pandas dataframe in the database.
   - driver: Driver used by sqlalchemy to connect with database. Only used if custom_connection = False. Default = 'ODBC Driver 17 for SQL Server'.
   - show_progress: True for printed output describing updates made to database. Default = False.
   - kwargs: Data types to be assigned to a column in format column_name: 'type'. If column not included, default = '[nvarchar] (255) Null'.
-    - eg: Age: 'INT'.
+    - e.g.: Age: 'INT'.
 
 #### populate_table
 ``` sh
