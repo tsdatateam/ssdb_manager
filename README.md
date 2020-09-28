@@ -31,7 +31,7 @@ Imports and returns a full table from the database.
 create_table(key:tuple, table_name:str, df, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False, **kwargs)
 ```
 Creates a table using the passed pandas dataframe in the database.
-**Arguments**
+**Arguments:**
   - **key**: Tuple in format (server, database).
   - **table_name**: Name of table to be created in the database. 
   - **df**: Pandas DataFrame object that table will be created from and populated with.
@@ -47,7 +47,7 @@ Creates a table using the passed pandas dataframe in the database.
 populate_table(key:tuple, table_name:str, df, if_exists:str = 'append', schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False)
 ```
 Adds rows to table in the database.
-**Arguments**
+**Arguments:**
   - **key**: Tuple in format (server, database).
   - **table_name**: Name of table to be populated in database. 
   - **df**: Pandas DataFrame object that table will be populated with.
@@ -62,7 +62,7 @@ Adds rows to table in the database.
 drop_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False)
 ```
 Drops table from database. 
-**Arguments**
+**Arguments:**
   -  **key**: Tuple in format ('server', 'database').
   -  **table_name**: Name of table to be dropped from database. 
   -  schema: Schema in which table exists in database. Default = 'dbo'.
@@ -75,7 +75,7 @@ Drops table from database.
 trunc_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False)
 ```
 Truncates table in database.
-**Arguments**
+**Arguments:**
   - **key**: Tuple in format (server, database).
   - **table_name**: Name of table to be truncated from database. 
   - schema: Schema in which table exists in database. Default = 'dbo'.
@@ -88,7 +88,7 @@ Truncates table in database.
 delete_rows(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False, **kwargs)
 ```
 Removes specified rows from table in database. 
-**Arguments**
+**Arguments:**
   - **key**: Tuple in format (server, database).
   - **table_name**: Name of table to be deleted from database. 
   - schema: Schema in which table exists in database. Default = 'dbo'.
@@ -99,7 +99,7 @@ Removes specified rows from table in database.
      - Eg. ```delete_rows(your_key, table_name='Employees', FirstName = 'Sam')``` deletes all rows of employees named Sam.
     ```delete_rows(your_key, table_name='Employees', FirstName = 'Sam', LastName = 'I Am')``` deletes Sam I Am from the employees table.
 
-**Limitations**: 
+**Limitations:**: 
   - Column names must not have spaces/periods, etc.
   - Can only filter on =, not < or > ***(use sqlalchemy for this functionality).
 
@@ -108,7 +108,7 @@ Removes specified rows from table in database.
 custom_query(key:tuple, query:str,custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server')
 ```
 Runs custom query and returns resulting table.
-**Arguments**
+**Arguments:**
   -  **key**: Tuple in format (server, database).
   -  **query**: String with custom SQL query.
   -  custom_connection: True if user wants do define their own conn and engine variables. False otherwise. Default = False. 
