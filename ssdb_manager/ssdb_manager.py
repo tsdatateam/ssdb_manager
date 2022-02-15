@@ -25,8 +25,8 @@ def make_connection(key:tuple, custom_connection:bool, driver:str):
         Trusted_Connection=yes;')
     The engine variable is initialized in the following form: 
         sqlalchemy.create_engine('mssql+pyodbc:
-        //'your_server'/'your_db'?driver='your_driver'
-        ?Trusted_Connection=yes', fast_executemany=True)
+        //'your_server'/'your_db'?Trusted_Connection=yes
+        &driver='your_driver, fast_executemany=True)
     If using a different authentication method to connect to a database, 
         use custom_connection = True.
     """
@@ -39,7 +39,7 @@ def make_connection(key:tuple, custom_connection:bool, driver:str):
         conn_text = ('Driver={SQL Server};Server='+server+
             ';Integrated Security=true Database='+db+';Trusted_Connection=yes;')
         conn = pyodbc.connect(conn_text)
-        engine_text = 'mssql+pyodbc://'+server+'/'+db+'?driver='+driver+'?Trusted_Connection=yes'
+        engine_text = 'mssql+pyodbc://'+server+'/'+db+'?Trusted_Connection=yes&driver='+driver
         engine = create_engine(engine_text, fast_executemany=True)
 
 
