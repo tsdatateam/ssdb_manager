@@ -19,25 +19,29 @@ def make_connection(key:tuple, custom_connection:bool, driver:str):
             Only used if custom_connection = False. 
     
     *The conn variable is initialized in the following form: 
-        pyodbc.conntec('Driver={SQL Server};
-        Server='your_server';
-        Integrated Security=true Database='your_database';
-        Trusted_Connection=yes;')
+        pyodbc.connect("
+            Driver={SQL Server};
+            Server=your_server;
+            Database=your_database;
+            Integrated Security=true;
+            Trusted_Connection=yes;
+        ")
     The engine variable is initialized in the following form: 
         sqlalchemy.create_engine('mssql+pyodbc:
-        //'your_server'/'your_db'?Trusted_Connection=yes
-        &driver='your_driver, fast_executemany=True)
+        //'your_server'/'your_db'?Trusted_Connection=yes&driver='your_driver fast_executemany=True)
     If using a different authentication method to connect to a database, 
         use custom_connection = True.
     """
     global server, db
     assert(len(key) == 2), 'The key argument must be in the form (server, database)'
-    server = key[0]
-    db = key[1]
+    server, db = key[0], key[1]
     if not custom_connection:
         global engine, conn
-        conn_text = ('Driver={SQL Server};Server='+server+
-            ';Integrated Security=true Database='+db+';Trusted_Connection=yes;')
+        conn_text = ("Driver={SQL Server};"
+                     "Server="+server+";"
+                     "Database="+db+";"
+                     "Integrated Security=true;"
+                     "Trusted_Connection=yes;")
         conn = pyodbc.connect(conn_text)
         engine_text = 'mssql+pyodbc://'+server+'/'+db+'?Trusted_Connection=yes&driver='+driver
         engine = create_engine(engine_text, fast_executemany=True)
@@ -53,8 +57,7 @@ def close_connection():
     engine.dispose()
 
 
-def import_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, 
-    driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False):
+def import_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False):
     """ Imports and returns a full table from the database.
     
     Arguments:
@@ -70,14 +73,13 @@ def import_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connectio
     make_connection(key, custom_connection, driver)
     if show_progress: print('Importing table ['+table_name+'] from '+db+'...')
     data_table = pd.read_sql_query('SELECT * FROM ['+db+'].['+schema+'].['+table_name+']', engine)
-    if show_progress: print('\tSuccessfully imported '+table_name+':',data_table.shape)
+    if show_progress: print('\tSuccessfully imported ['+db+'].['+schema+'].['+table_name+']:',data_table.shape)
     if not custom_connection: 
         close_connection()
     return data_table
 
 
-def create_table(key:tuple, table_name:str, df, schema:str = 'dbo', custom_connection:bool = False, 
-    driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False, **kwargs):
+def create_table(key:tuple, table_name:str, df, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False, **kwargs):
     """ Creates a table using the passed pandas dataframe in the database.
     
     Arguments:
@@ -95,7 +97,7 @@ def create_table(key:tuple, table_name:str, df, schema:str = 'dbo', custom_conne
             eg: Age:'INT'.
     """
     make_connection(key, custom_connection, driver)
-    cre_sql = "CREATE TABLE ["+db+'].['+schema+'].['+table_name+'] ('
+    cre_sql = 'CREATE TABLE ['+db+'].['+schema+'].['+table_name+'] ('
     for col in df.columns[range(len(df.columns))]:
         if col in kwargs.keys():
             column_type = kwargs[col]
@@ -113,8 +115,7 @@ def create_table(key:tuple, table_name:str, df, schema:str = 'dbo', custom_conne
         custom_connection = custom_connection, driver = driver, show_progress=show_progress)
 
 
-def populate_table(key:tuple, table_name:str, df, if_exists:str = 'append', schema:str = 'dbo', 
-    custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False):
+def populate_table(key:tuple, table_name:str, df, if_exists:str = 'append', schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False, truncate_first:bool = False):
     """Adds rows to table in the database.
     
     Arguments:
@@ -129,7 +130,10 @@ def populate_table(key:tuple, table_name:str, df, if_exists:str = 'append', sche
         driver: Driver used by sqlalchemy to connect with database. 
             Only used if custom_connection = False. Default = 'ODBC Driver 17 for SQL Server'.
         show_progress: True for printed output describing updates made to database. Default = False.
+        truncate_first: True to truncate existing table before populating. Default = False.
     """
+    if truncate_first:
+        trunc_table(key, table_name, show_progress=True)
     make_connection(key, custom_connection, driver)
     df.to_sql(table_name, con = engine, schema = schema, if_exists = if_exists, index = False, 
         chunksize = 1000, dtype ={col_name: NVARCHAR for col_name in df})
@@ -138,8 +142,30 @@ def populate_table(key:tuple, table_name:str, df, if_exists:str = 'append', sche
     if show_progress: print(str(len(df)) + ' rows added to ' + table_name + ' in ' + db+'.')
 
 
-def drop_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, 
-    driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False):
+def copy_table(key:tuple, existing_table_name:str, new_table_name:str, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False):
+    """ Copies table from database into new table. 
+    
+    Arguments:
+        key: Tuple in format ('server', 'database').
+        existing_table_name: Name of table to be copied from database. 
+        new_table_name: Name of new table with copied data.
+        schema: Shcema in which table exists in database. Default = 'dbo'.
+        custom_connection: True if user wants do define their own conn and engine variables. 
+            False otherwise. Default = False.
+        driver: Driver used by sqlalchemy to connect with database. 
+            Only used if custom_connection = False. Default = 'ODBC Driver 17 for SQL Server'.  
+        show_progress: True for printed output describing updates made to database. Default = False.
+   """
+    make_connection(key, custom_connection, driver)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * INTO ['+db+'].['+schema+'].['+new_table_name+'] FROM ['+db+'].['+schema+'].['+existing_table_name+']')
+    cursor.commit()
+    close_connection()
+    if show_progress:
+        print('Successfully copied ['+db+'].['+schema+'].['+new_table_name+'] into ['+db+'].['+schema+'].['+existing_table_name+']')
+
+
+def drop_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False):
     """ Removes table from database. 
     
     Arguments:
@@ -161,8 +187,7 @@ def drop_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:
     if show_progress: print(table_name + ' dropped from ' + db +'.')
 
 
-def trunc_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, 
-    driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False):
+def trunc_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False):
     """ Truncates table in database. 
     
     Arguments:
@@ -184,8 +209,7 @@ def trunc_table(key:tuple, table_name:str, schema:str = 'dbo', custom_connection
     if show_progress: print(table_name + ' truncated in ' + db+'.')
 
 
-def delete_rows(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, 
-    driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False, **kwargs):
+def delete_rows(key:tuple, table_name:str, schema:str = 'dbo', custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server', show_progress:bool = False, **kwargs):
     """ Removes rows from a table in database.
     
     Arguments:
@@ -240,8 +264,7 @@ def delete_rows(key:tuple, table_name:str, schema:str = 'dbo', custom_connection
         close_connection()
 
 
-def custom_query(key:tuple, query:str,custom_connection:bool = False, 
-    driver:str = 'ODBC Driver 17 for SQL Server'):
+def custom_query(key:tuple, query:str, custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server'):
     """ Runs custom queries. Returns resulting table.
     
     Arguments:
@@ -257,3 +280,24 @@ def custom_query(key:tuple, query:str,custom_connection:bool = False,
     if not custom_connection:
         close_connection()
     return data_table
+
+
+def modify_table(key:tuple, query:str, custom_connection:bool = False, driver:str = 'ODBC Driver 17 for SQL Server'):
+    """ Runs custom queries to modify table.
+    
+    Arguments:
+        key: Tuple in format (server, database).
+        query: String with custom SQL query.
+        custom_connection: True if user wants do define their own conn and engine variables. 
+            False otherwise. Default = False. 
+        driver: Driver used by sqlalchemy to connect with database. 
+            Only used if custom_connection = False. Default = 'ODBC Driver 17 for SQL Server'.
+    """
+    make_connection(key, custom_connection, driver)
+    cursor = conn.cursor()
+    cursor.execute(query)
+    cursor.commit()
+    print(query)
+    
+    if not custom_connection:
+        close_connection()
